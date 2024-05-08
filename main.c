@@ -75,23 +75,21 @@ static u_int32_t print_pkt (struct nfq_data *tb)
 		if(ip_hdr->ip_p == IPPROTO_TCP){
 			struct libnet_tcp_hdr *tcp_hdr = (struct libnet_tcp_hdr *)(data + ((ip_hdr->ip_hl)<<2));
 			uint16_t dest_port = ntohs(tcp_hdr->th_dport);
-			if(dest_port == 80 || dest_port == 443){
-				const char *host_field = "Host: ";
-				const char *host_start = strstr((const char *)(data + (ip_hdr->ip_hl<<2) + (tcp_hdr->th_off << 2)), host_field);
-				if(host_start){
-					host_start += strlen(host_field);
-					const char *host_end = strchr(host_start, '\r');
-					if(host_end){
-						int host_len = host_end - host_start;
-						char host[host_len+1];
-						strncpy(host, host_start, host_len);
-						host[host_len]=0;
-						if(strcmp(host, block)==0){
-							pass=0;
-							return id;
-						}
-						else pass=1;
+			const char *host_field = "Host: ";
+			const char *host_start = strstr((const char *)(data + (ip_hdr->ip_hl<<2) + (tcp_hdr->th_off << 2)), host_field);
+			if(host_start){
+				host_start += strlen(host_field);
+				const char *host_end = strchr(host_start, '\r');
+				if(host_end){
+					int host_len = host_end - host_start;
+					char host[host_len+1];
+					strncpy(host, host_start, host_len);
+					host[host_len]=0;
+					if(strcmp(host, block)==0){
+						pass=0;
+						return id;
 					}
+					else pass=1;
 				}
 			}
 		}
